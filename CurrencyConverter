@@ -1,0 +1,63 @@
+package TaskJava;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Scanner;
+import org.json.JSONObject;
+
+public class CurrencyConverter {
+
+    // Fetch JSON string from API URL
+    public static String fetchJson(String url) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return response.body();
+    }
+
+    // Fetch exchange rate from base to target currency
+    public static double fetchExchangeRate(String base, String target) {
+        String apiUrl = "https://api.exchangerate-api.com/v4/latest/" + base;
+        try {
+            String jsonString = fetchJson(apiUrl);
+            JSONObject json = new JSONObject(jsonString);
+            JSONObject rates = json.getJSONObject("rates");
+            return rates.getDouble(target);
+        } catch (Exception e) {
+            System.out.println("Error fetching exchange rate: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    // Main method for user interaction
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("=== Currency Converter ===");
+        System.out.print("Enter base currency (e.g., USD): ");
+        String baseCurrency = scanner.next().toUpperCase();
+
+        System.out.print("Enter target currency (e.g., EUR): ");
+        String targetCurrency = scanner.next().toUpperCase();
+
+        System.out.print("Enter amount in " + baseCurrency + ": ");
+        double amount = scanner.nextDouble();
+
+        double rate = fetchExchangeRate(baseCurrency, targetCurrency);
+
+        if (rate != -1) {
+            double convertedAmount = amount * rate;
+            System.out.printf("%.2f %s = %.2f %s%n", amount, baseCurrency, convertedAmount, targetCurrency);
+        } else {
+            System.out.println("Failed to convert currency. Please try again later.");
+        }
+
+        scanner.close();
+    }
+}
