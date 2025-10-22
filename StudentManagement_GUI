@@ -1,0 +1,160 @@
+package TaskJava;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.HashMap;
+
+class Student {
+    private int rollNumber;
+    private String name;
+    private String grade;
+
+    public Student(int rollNumber, String name, String grade) {
+        this.rollNumber = rollNumber;
+        this.name = name;
+        this.grade = grade;
+    }
+
+    public int getRollNumber() { return rollNumber; }
+    public String getName() { return name; }
+    public String getGrade() { return grade; }
+
+    public void setName(String name) { this.name = name; }
+    public void setGrade(String grade) { this.grade = grade; }
+
+    public String toString() {
+        return "Roll: " + rollNumber + ", Name: " + name + ", Grade: " + grade;
+    }
+}
+
+public class StudentManagementGUI extends JFrame {
+    private HashMap<Integer, Student> studentMap = new HashMap<>();
+    private JTextArea outputArea;
+
+    public StudentManagementGUI() {
+        setTitle("Student Management System");
+        setSize(600, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        add(new JScrollPane(outputArea), BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+        String[] buttons = {"Add", "Edit", "Remove", "Search", "Display All"};
+        for (String label : buttons) {
+            JButton btn = new JButton(label);
+            btn.addActionListener(e -> handleAction(label));
+            buttonPanel.add(btn);
+        }
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void handleAction(String action) {
+        switch (action) {
+            case "Add":
+                addStudent();
+                break;
+            case "Edit":
+                editStudent();
+                break;
+            case "Remove":
+                removeStudent();
+                break;
+            case "Search":
+                searchStudent();
+                break;
+            case "Display All":
+                displayAll();
+                break;
+        }
+    }
+
+    private void addStudent() {
+        try {
+            int roll = Integer.parseInt(JOptionPane.showInputDialog("Enter Roll Number:"));
+            if (studentMap.containsKey(roll)) {
+                showMessage("Student already exists!");
+                return;
+            }
+            String name = JOptionPane.showInputDialog("Enter Name:");
+            String grade = JOptionPane.showInputDialog("Enter Grade:");
+
+            studentMap.put(roll, new Student(roll, name, grade));
+            showMessage("Student added.");
+        } catch (Exception e) {
+            showMessage("Invalid input!");
+        }
+    }
+
+    private void editStudent() {
+        try {
+            int roll = Integer.parseInt(JOptionPane.showInputDialog("Enter Roll Number:"));
+            Student student = studentMap.get(roll);
+            if (student == null) {
+                showMessage("Student not found.");
+                return;
+            }
+            String name = JOptionPane.showInputDialog("Enter New Name:", student.getName());
+            String grade = JOptionPane.showInputDialog("Enter New Grade:", student.getGrade());
+
+            student.setName(name);
+            student.setGrade(grade);
+            showMessage("Student updated.");
+        } catch (Exception e) {
+            showMessage("Invalid input!");
+        }
+    }
+
+    private void removeStudent() {
+        try {
+            int roll = Integer.parseInt(JOptionPane.showInputDialog("Enter Roll Number to Remove:"));
+            if (studentMap.remove(roll) != null) {
+                showMessage("Student removed.");
+            } else {
+                showMessage("Student not found.");
+            }
+        } catch (Exception e) {
+            showMessage("Invalid input!");
+        }
+    }
+
+    private void searchStudent() {
+        try {
+            int roll = Integer.parseInt(JOptionPane.showInputDialog("Enter Roll Number to Search:"));
+            Student student = studentMap.get(roll);
+            if (student != null) {
+                showMessage("Found: " + student);
+            } else {
+                showMessage("Student not found.");
+            }
+        } catch (Exception e) {
+            showMessage("Invalid input!");
+        }
+    }
+
+    private void displayAll() {
+        if (studentMap.isEmpty()) {
+            outputArea.setText("No students available.");
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (Student s : studentMap.values()) {
+                sb.append(s).append("\n");
+            }
+            outputArea.setText(sb.toString());
+        }
+    }
+
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            StudentManagementGUI app = new StudentManagementGUI();
+            app.setVisible(true);
+        });
+    }
+}
